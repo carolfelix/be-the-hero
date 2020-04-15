@@ -1,6 +1,6 @@
 import React from 'react';
 import {Feather} from '@expo/vector-icons';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {View, Image, TouchableOpacity, Linking, Text} from 'react-native';
 import * as MailComposer from 'expo-mail-composer'
 
@@ -11,7 +11,12 @@ import logoImg from '../../assets/logo.png'
 export default function Detail(){
      
     const navigation = useNavigation();
-    const message = 'Olá APAD, estou entrando em contato pois gostaria de ajudar no caso "Cadelinha atropelada" com o valor de R$120,00 '
+    const route = useRoute();
+
+    const incident = route.params.incident;
+
+
+    const message = `Olá ${incident.nome}, estou entrando em contato pois gostaria de ajudar no caso "${incident.title}" com o valor de ${Intl.NumberFormat('pt-BR', {style: 'currency', currency: 'BRL'}).format(incident.value)}`
 
     function navigateBack(){
         navigation.goBack()
@@ -19,14 +24,14 @@ export default function Detail(){
 
     function sendMail(){
         MailComposer.composeAsync({
-            subject: 'Herói do caso: Cadelinha Atropelada',
-            recipients: ['carolinafelix.ana@gmail.com'],
+            subject:  `Herói do caso: ${incident.title}`,
+            recipients: [incident.email],
             body: message,
         })
     }
 
     function sendWhatsapp(){
-        Linking.openURL(`https://wa.me/5511996383300?text=${message}`)
+        Linking.openURL(`whatsapp://send?phone=${incident.whatsapp}&text=${message}`);
     }
 
     return(
@@ -40,14 +45,18 @@ export default function Detail(){
             </View>
 
             <View style={style.incident}>
-                <Text style={[style.incidentProperty, {marginTop: 0}]}>ONG:</Text>
-                <Text style={style.incidentValue}>APAD</Text>
+            <Text style={[style.incidentProperty, { marginTop : 0}]}>ONG:</Text>
+            <Text style={style.incidentValue}>{incident.nome} de {incident.city}/{incident.uf}</Text>
 
                 <Text style={style.incidentProperty}>CASO:</Text>
-                <Text style={style.incidentValue}>Cadelinha Atropelada</Text>
+                <Text style={style.incidentValue}>{incident.title}</Text>
 
                 <Text style={style.incidentProperty}>VALOR:</Text>
-                <Text style={style.incidentValue}>R$ 120,00</Text>
+                <Text style={style.incidentValue}>
+                    {Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                         currency: 'BRL'}).format(incident.value)}
+                </Text>
             </View>
 
             <View style={style.contactBow}>
